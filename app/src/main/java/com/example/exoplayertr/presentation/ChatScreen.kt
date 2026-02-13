@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -42,6 +44,8 @@ fun ChatScreenRoot(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
+                Lifecycle.Event.ON_START -> viewModel.onStart()
+                Lifecycle.Event.ON_STOP -> viewModel.onStop()
                 Lifecycle.Event.ON_PAUSE -> viewModel.onPause()
                 Lifecycle.Event.ON_RESUME -> viewModel.onResume()
                 else -> Unit
@@ -59,7 +63,8 @@ fun ChatScreenRoot(
         exoPlayer = viewModel.getPlayer(),
         onIntent = viewModel::handleIntent,
         onClearSideEffect = viewModel::clearSideEffect,
-        onInitializeSpeech = viewModel::initializeSpeechRecognition
+        onInitializeSpeech = viewModel::initializeSpeechRecognition,
+        onTogglePlayPause = viewModel::togglePlayPause
     )
 }
 
@@ -70,7 +75,8 @@ private fun ChatScreen(
     exoPlayer: ExoPlayer,
     onIntent: (ChatIntent) -> Unit,
     onClearSideEffect: () -> Unit,
-    onInitializeSpeech: () -> Unit
+    onInitializeSpeech: () -> Unit,
+    onTogglePlayPause: () -> Unit
 ) {
     val context = LocalContext.current
     var isTransitioning by remember { mutableStateOf(false) }
@@ -103,15 +109,24 @@ private fun ChatScreen(
         }
     }
 
-    LaunchedEffect(Unit) { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) }
+    LaunchedEffect(Unit) {
+        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = { onTogglePlayPause() }
+                    )
+                }
+        ) {
             VideoPlayer(
                 exoPlayer = exoPlayer,
                 modifier = Modifier.fillMaxSize()
@@ -149,6 +164,7 @@ private fun ChatScreenPreview() {
         exoPlayer = ExoPlayer.Builder(context).build(),
         onIntent = {},
         onClearSideEffect = {},
-        onInitializeSpeech = {}
+        onInitializeSpeech = {},
+        onTogglePlayPause = {}
     )
 }

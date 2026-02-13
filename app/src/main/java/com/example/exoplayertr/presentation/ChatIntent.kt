@@ -6,4 +6,5 @@ sealed interface ChatIntent {
     data class SpeechRecognized(val text: String) : ChatIntent
     data object SpeechRecognitionFailed : ChatIntent
     data object EndChat : ChatIntent
+    object SilenceTimeout : ChatIntent
 }

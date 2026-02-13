@@ -10,6 +10,7 @@ fun ChatState.toVideoConfig(): VideoConfig = when (this) {
     is ChatState.Greeting -> VideoConfig("greeting".lowercase(), shouldLoop = false)
     is ChatState.Listening -> VideoConfig("listening".lowercase(), shouldLoop = true)
     is ChatState.Responding -> VideoConfig(responseType.name.lowercase(), shouldLoop = false)
+    is ChatState.Prompt -> VideoConfig("prompt".lowercase(), shouldLoop = false)
     is ChatState.Goodbye -> VideoConfig("goodbye".lowercase(), shouldLoop = false)
     is ChatState.Fallback -> VideoConfig("fallback".lowercase(), shouldLoop = false)
 }

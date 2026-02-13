@@ -16,8 +16,10 @@ internal fun getStatusText(state: ChatState): String {
             ResponseType.GENERAL_RESPONSE -> "Responding..."
             ResponseType.GOODBYE -> "Saying goodbye..."
             ResponseType.FALLBACK -> "Didn't catch that..."
+            ResponseType.PROMPT -> "Are you still there ?"
         }
         is ChatState.Goodbye -> "Goodbye!"
         is ChatState.Fallback -> "Didn't catch that..."
+        is ChatState.Prompt -> "Are you still there?"
     }
 }

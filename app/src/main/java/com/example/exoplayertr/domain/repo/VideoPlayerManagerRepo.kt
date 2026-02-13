@@ -12,12 +12,7 @@ interface VideoPlayerManagerRepo {
         nextVideoFileName: String? = null,
         onCompleted: (() -> Unit)? = null
     )
-
-//    fun switchToNextVideo(shouldLoop: Boolean, onCompleted: (() -> Unit)? = null)
-
     fun pause()
-
     fun resume()
-
     fun release()
 }

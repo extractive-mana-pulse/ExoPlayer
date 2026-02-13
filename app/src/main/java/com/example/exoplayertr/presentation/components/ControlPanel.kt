@@ -47,18 +47,11 @@ internal fun ControlPanel(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = getStatusText(state),
-                style = MaterialTheme.typography.titleLarge.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold
-                ),
-            )
-
             if (state is ChatState.Listening) {
-                Spacer(modifier = Modifier.width(12.dp))
                 RecordingIndicator()
+                Spacer(modifier = Modifier.width(8.dp))
             }
+            AnimatedStatusTextFading(state = state)
         }
         Spacer(modifier = Modifier.height(16.dp))
         when (state) {
@@ -68,6 +61,7 @@ internal fun ControlPanel(
             is ChatState.Responding,
             is ChatState.Fallback -> ExoPlayerTRSecondaryButton(onEndChat)
             is ChatState.Goodbye -> Unit
+            ChatState.Prompt -> Unit
         }
         Spacer(modifier = Modifier.height(16.dp))
     }

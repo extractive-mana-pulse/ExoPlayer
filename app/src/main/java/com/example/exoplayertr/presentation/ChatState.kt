@@ -9,6 +9,7 @@ sealed interface ChatState {
     data object Greeting : ChatState
     data object Listening : ChatState
     data class Responding(val responseType: ResponseType) : ChatState
+    object Prompt : ChatState
     data object Goodbye : ChatState
     data object Fallback : ChatState
 }

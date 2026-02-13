@@ -12,10 +12,15 @@ class SpeechRecognitionManager(
     private val context: Context
 ) : SpeechRecognitionManagerRepo {
 
-    private var speechRecognizer: SpeechRecognizer? = null
     private var isListening = false
-    private var onResult: ((String) -> Unit)? = null
     private var onError: (() -> Unit)? = null
+    private var onResult: ((String) -> Unit)? = null
+    private var speechRecognizer: SpeechRecognizer? = null
+
+    override fun setCallbacks(onResult: (String) -> Unit, onError: () -> Unit) {
+        this.onResult = onResult
+        this.onError = onError
+    }
 
     override fun initialize() {
         if (SpeechRecognizer.isRecognitionAvailable(context)) {
@@ -25,25 +30,17 @@ class SpeechRecognitionManager(
         }
     }
 
-    override fun setCallbacks(onResult: (String) -> Unit, onError: () -> Unit) {
-        this.onResult = onResult
-        this.onError = onError
-    }
-
-    override fun startListening() {
-        if (isListening) return
-
+    override fun startListening() { if (isListening) return
         speechRecognizer?.let { recognizer ->
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
 
-                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
+                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 12000L)
                 putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L)
                 putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 5000L)
             }
-
             recognizer.startListening(intent)
             isListening = true
         }
