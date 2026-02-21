@@ -6,5 +6,5 @@ interface SpeechRecognitionManagerRepo {
     fun stopListening()
     fun cancel()
     fun destroy()
-    fun setCallbacks(onResult: (String) -> Unit, onError: () -> Unit) // NEW
+    fun setCallbacks(onResult: (String) -> Unit, onError: () -> Unit)
 }

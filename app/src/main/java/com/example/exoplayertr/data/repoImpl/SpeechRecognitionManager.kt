@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognitionListener
+import android.speech.RecognitionService
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import com.example.exoplayertr.domain.model.candidates
 import com.example.exoplayertr.domain.repo.SpeechRecognitionManagerRepo
 
 class SpeechRecognitionManager(
@@ -23,11 +25,27 @@ class SpeechRecognitionManager(
     }
 
     override fun initialize() {
-        if (SpeechRecognizer.isRecognitionAvailable(context)) {
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
-                setRecognitionListener(recognitionListener)
+        val isAvailable = SpeechRecognizer.isRecognitionAvailable(context)
+        if (!isAvailable) return
+
+        speechRecognizer = createBestRecognizer().apply {
+            setRecognitionListener(recognitionListener)
+        }
+    }
+
+    private fun createBestRecognizer(): SpeechRecognizer {
+        val packageManager = context.packageManager
+
+        for (component in candidates) {
+            val intent = Intent(RecognitionService.SERVICE_INTERFACE).apply {
+                setComponent(component)
+            }
+            val resolveInfo = packageManager.resolveService(intent, 0)
+            if (resolveInfo != null) {
+                return SpeechRecognizer.createSpeechRecognizer(context, component)
             }
         }
+        return SpeechRecognizer.createSpeechRecognizer(context)
     }
 
     override fun startListening() { if (isListening) return
@@ -36,6 +54,8 @@ class SpeechRecognitionManager(
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+                putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
+                putExtra("android.speech.extra.DICTATION_MODE", true)
 
                 putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 12000L)
                 putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L)
@@ -76,6 +96,7 @@ class SpeechRecognitionManager(
         override fun onEndOfSpeech() { isListening = false }
 
         override fun onError(error: Int) {
+            android.util.Log.e("SpeechRecognizer", "onError code: $error")
             val errorMsg = when (error) {
                 SpeechRecognizer.ERROR_AUDIO -> "Audio error"
                 SpeechRecognizer.ERROR_CLIENT -> "Client error"
@@ -88,6 +109,7 @@ class SpeechRecognitionManager(
                 SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Timeout"
                 else -> "Unknown: $error"
             }
+            initialize()
             isListening = false
             onError?.invoke()
         }

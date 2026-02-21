@@ -15,7 +15,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 
-
 @OptIn(UnstableApi::class)
 @Composable
 internal fun VideoPlayer(
